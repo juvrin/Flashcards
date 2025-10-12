@@ -2,6 +2,7 @@ import pandas as pd
 from pathlib import Path
 import datetime
 import os.path
+import sys
 
 def read_data(inputfile):
     """Read data from csv"""
@@ -21,99 +22,77 @@ def round_one(data):
     """Practice round one"""
     correct = {}
     wrong = {}
-    practice = True
-    while practice:
-        for i in range(0,data.shape[0]):
 
-            showanswer = True
-            correctwrong = True
+    for i in range(0,data.shape[0]):
 
-            while showanswer:
-                print(f"\n{data['QUESTION'][i]}")
-                a = input("\tShow answer (a) or quit (q): ")
-                if a == "a":
-                    print(f"\t{data['ANSWER'][i]}")
-                    showanswer = False 
-                    break
-                elif a == "q":
-                    showanswer = False 
-                    correctwrong = False
-                    practice = False
-                    break
-                else:
-                    print("Please enter a or q.")
-                    showanswer = True
-                
-            while correctwrong:
-                x = input("\tDid you get this correct (y/n) or quit (q): ")
-                if x == "y":
-                    correct[data['QUESTION'][i]] = data['ANSWER'][i]
-                    correctwrong = False
-                    break
-                elif x == "n":
-                    wrong[data['QUESTION'][i]] = data['ANSWER'][i]
-                    correctwrong = False
-                    break
-                elif x == "q":
-                    showanswer = False 
-                    correctwrong = False
-                    practice = False
-                    break
-            
-            if a == "q" or x =="q":
-                practice = False
+        showanswer = True
+        correctwrong = True
+
+        while showanswer:
+            print(f"\n{data['QUESTION'][i]}")
+            a = input("\tShow answer (a) or quit (q): ")
+            if a == "q":
+                sys.exit(0)
+            if a == "a":
+                print(f"\t{data['ANSWER'][i]}")
+                showanswer = False 
                 break
-        printfunc(1, len(correct), len(wrong))          
-        practice = False
-        return (correct, wrong)
+            else:
+                print("Please enter a or q.")
+                showanswer = True
+            
+        while correctwrong:
+            x = input("\tDid you get this correct (y/n) or quit (q): ")
+            if x == "q":
+                sys.exit(0)
+            if x == "y":
+                correct[data['QUESTION'][i]] = data['ANSWER'][i]
+                correctwrong = False
+                break
+            elif x == "n":
+                wrong[data['QUESTION'][i]] = data['ANSWER'][i]
+                correctwrong = False
+                break
+            
+    printfunc(1, len(correct), len(wrong))          
+    return (correct, wrong)
           
 def round_two(wrong):
     """Practice round two"""
     correct2 = {}
     wrong2 = {}
-    practice = True
-    while practice:
-        for question, answer in wrong.items():
-            showanswer = True
-            correctwrong = True
-            while showanswer:
-                print(f"\n{question}")
-                a = input("\tShow answer (a) or quit (q): ")
-                if a == "a":
-                    print(f"\t{answer}")
-                    showanswer = False 
-                    break
-                elif a == "q":
-                    showanswer = False 
-                    correctwrong = False
-                    practice = False
-                    break
-                else:
-                    print("Please enter a or q.")
-                    showanswer = True
-                
-            while correctwrong:
-                x = input("\tDid you get this correct (y/n) or quit (q): ")
-                if x == "y":
-                    correct2[question] = answer
-                    correctwrong = False
-                    break
-                elif x == "n":
-                    wrong2[question] = answer
-                    correctwrong = False
-                    break
-                elif x == "q":
-                    showanswer = False 
-                    correctwrong = False
-                    practice = False
-                    break
-            
-            if a == "q" or x =="q":
-                practice = False
+   
+    for question, answer in wrong.items():
+        showanswer = True
+        correctwrong = True
+        while showanswer:
+            print(f"\n{question}")
+            a = input("\tShow answer (a) or quit (q): ")
+            if a == "q":
+                sys.exit(0)
+            if a == "a":
+                print(f"\t{answer}")
+                showanswer = False 
                 break
-        printfunc(2, len(correct2), len(wrong2))          
-        practice = False
-        return(correct2, wrong2)
+            else:
+                print("Please enter a or q.")
+                showanswer = True
+            
+        while correctwrong:
+            x = input("\tDid you get this correct (y/n) or quit (q): ")
+            if x == "q":
+                sys.exit(0)
+            if x == "y":
+                correct2[question] = answer
+                correctwrong = False
+                break
+            elif x == "n":
+                wrong2[question] = answer
+                correctwrong = False
+                break
+    
+    printfunc(2, len(correct2), len(wrong2))          
+    return(correct2, wrong2)
     
 def write_to_csv(correct,wrong, outputfile):
     """Write results of first round to csv"""
