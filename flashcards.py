@@ -16,6 +16,8 @@ def load_flashcards(file_path):
 # Path to your csv file
 file_path = 'Vragen CSS_fortesting.csv'
 outputfile = "Results.csv"
+random_option = 'n'
+
 
 # Load flashcards
 flashcards = load_flashcards(file_path)
@@ -55,55 +57,79 @@ class FlashcardApp:
         self.wrong_button = tk.Button(master, text="wrong", command = self.wrong, underline=0)
         self.wrong_button.pack()
 
+        # Optional next button
+        # self.next_button = tk.Button(master, text="Next", command=self.next_flashcard)
+        # self.next_button.pack()
+
         # Add keyboard shortcuts
         master.bind('a', self.reveal_answer)
         master.bind('q', self.destroy)
         master.bind('c', self.correct)
         master.bind('w', self.wrong)
 
+        # Initialize empty lists for keeping correct and wrong items in
+        self.correct = []
+        self.wrong = []
+        self.roundn = 1
+        self.final_wrong = 0
+
         # Initialize flashcards by random shuffling them
         self.flashcard_list = list(flashcards.items())
-        random.shuffle(self.flashcard_list)
+        if random_option == 'y':
+            random.shuffle(self.flashcard_list)
         self.current_flashcard_index = -1
+        self.current_wrong_index = -1
         self.next_flashcard()
-
-    def write_to_csv(self):
-        """Write results of first round to csv"""
-        date = datetime.datetime.now()
-        results = f"{date.strftime("%d/%m/%Y")},{self.countcorrect},{self.countwrong}\n"
-        file = os.path.isfile(outputfile)
-        if file:
-            with open(outputfile,'a') as fd:
-                fd.write(results)
-        else:
-            with open(outputfile,'w') as fd:
-                fd.write("Date, Correct, Wrong\n")
-                fd.write(results)
 
     def next_flashcard(self):
         self.answer_label.config(text="")
         self.current_flashcard_index += 1
-        if self.current_flashcard_index >= len(self.flashcard_list):
+        self.update_progress()
+
+        if self.current_flashcard_index == len(self.flashcard_list):
             self.write_to_csv()
+        if self.current_flashcard_index >= len(self.flashcard_list):
+            self.roundn = 2
+            self.practice_wrongs()
+        else:
+            self.current_question, self.current_answer = self.flashcard_list[self.current_flashcard_index]
+            self.question_label.config(text=self.current_question)
+
+    def practice_wrongs(self):
+        if self.current_wrong_index == -1:
             self.countcorrect = 0
             self.countwrong = 0
-            random.shuffle(self.flashcard_list)
-            self.current_flashcard_index = 0 
             self.progressbar.step(0)
-
+        if random_option == 'y':
+            random.shuffle(self.wrong)
+        self.answer_label.config(text="")
+        self.current_wrong_index += 1 
         self.update_progress()
-        self.current_question, self.current_answer = self.flashcard_list[self.current_flashcard_index]
-        self.question_label.config(text=self.current_question)
 
+        if self.current_wrong_index >= self.final_wrong:
+            self.destroy()
+        else:
+            self.current_question, self.current_answer = self.wrong[self.current_wrong_index]
+            self.question_label.config(text=self.current_question)
+        
     def reveal_answer(self, event=None):
         self.answer_label.config(text=self.current_answer)
     
     def correct(self, event=None):
         self.countcorrect += 1
+        if self.roundn == 1:
+            self.correct.append(self.flashcard_list[self.current_flashcard_index])
+        if self.roundn == 2:
+            self.correct.append(self.wrong[self.current_wrong_index])
         self.next_flashcard()
 
     def wrong(self, event=None):
         self.countwrong += 1
+        if self.roundn == 1:
+            self.wrong.append(self.flashcard_list[self.current_flashcard_index])
+            self.final_wrong = len(self.wrong)
+        if self.roundn == 2:
+            self.wrong.append(self.wrong[self.current_wrong_index])
         self.next_flashcard()
     
     def destroy(self, event=None):
@@ -117,6 +143,20 @@ class FlashcardApp:
             self.new_value = 0
         self.progress_var.set(self.new_value)
         self.progressbar["value"] = self.new_value
+    
+    def write_to_csv(self):
+        """Write results of first round to csv"""
+        date = datetime.datetime.now()
+        results = f"{date.strftime("%d/%m/%Y %H:%M")},{self.roundn},{self.countcorrect},{self.countwrong}\n"
+        file = os.path.isfile(outputfile)
+        if file:
+            with open(outputfile,'a') as fd:
+                fd.write(results)
+        else:
+            with open(outputfile,'w') as fd:
+                fd.write("Date, Roundn, Correct, Wrong\n")
+                fd.write(results)
+
         
 root = tk.Tk()
 app = FlashcardApp(root)
