@@ -8,6 +8,11 @@ import os.path
 
 # Adapted version from https://medium.com/@arunabh223/how-i-prepare-for-exams-by-creating-flashcards-using-python-6db823b74083 
 
+# Path to your csv file
+file_path = 'Vragen CSS_fortesting.csv'
+outputfile = "Results_fortesting.csv"
+random_option = 'n'
+
 # Load flashcards from csv file
 def load_flashcards(file_path):
     df = pd.read_csv(file_path)
@@ -21,11 +26,6 @@ def load_topics(file_path):
         while i not in undup:
             undup.append(i)  
     return undup
-
-# Path to your csv file
-file_path = 'Vragen CSS_fortesting.csv'
-outputfile = "Results.csv"
-random_option = 'n'
 
 # Load flashcards
 flashcards = load_flashcards(file_path)
@@ -93,8 +93,7 @@ class FlashcardApp:
     def next_flashcard(self):
         self.answer_label.config(text="")
         self.current_flashcard_index += 1
-        self.update_progress()
-
+    
         if self.current_flashcard_index == len(self.flashcard_list):
             self.percentage_correct = (self.countcorrect / len(self.flashcard_list))*100
             self.write_to_csv()
@@ -104,6 +103,7 @@ class FlashcardApp:
         else:
             self.current_question, self.current_answer = self.flashcard_list[self.current_flashcard_index]
             self.question_label.config(text=self.current_question)
+        self.update_progress()
 
     def practice_wrongs(self):
         if self.current_wrong_index == -1:
@@ -114,7 +114,6 @@ class FlashcardApp:
             random.shuffle(self.wrong)
         self.answer_label.config(text="")
         self.current_wrong_index += 1 
-        self.update_progress()
 
         if self.current_wrong_index >= self.final_wrong:
             self.percentage_correct = (self.countcorrect / len(self.wrong))*100
@@ -122,6 +121,7 @@ class FlashcardApp:
         else:
             self.current_question, self.current_answer = self.wrong[self.current_wrong_index]
             self.question_label.config(text=self.current_question)
+        self.update_progress()
         
     def reveal_answer(self, event=None):
         self.answer_label.config(text=self.current_answer)
