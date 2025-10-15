@@ -13,14 +13,23 @@ def load_flashcards(file_path):
     df = pd.read_csv(file_path)
     return dict(zip(df['QUESTION'], df['ANSWER']))
 
+def load_topics(file_path):
+    df_topics = pd.read_csv(file_path)
+    df_topics_only = list(df_topics['TOPIC'])
+    undup = []
+    for i in df_topics_only:
+        while i not in undup:
+            undup.append(i)  
+    return undup
+
 # Path to your csv file
 file_path = 'Vragen CSS_fortesting.csv'
 outputfile = "Results.csv"
 random_option = 'n'
 
-
 # Load flashcards
 flashcards = load_flashcards(file_path)
+topics = load_topics(file_path)
 
 class FlashcardApp:
     def __init__(self, master):
@@ -149,14 +158,14 @@ class FlashcardApp:
     def write_to_csv(self):
         """Write results to csv"""
         date = datetime.datetime.now()
-        results = f"{date.strftime("%d/%m/%Y %H:%M")},{self.roundn},{self.countcorrect},{self.countwrong}, {self.percentage_correct}, {len(self.flashcard_list)}\n"
+        results = f"{date.strftime("%d/%m/%Y %H:%M")},{self.roundn},{self.countcorrect},{self.countwrong}, {int(self.percentage_correct)}, {len(self.flashcard_list)}, {topics}\n"
         file = os.path.isfile(outputfile)
         if file:
             with open(outputfile,'a') as fd:
                 fd.write(results)
         else:
             with open(outputfile,'w') as fd:
-                fd.write("Date, Roundn, Correct, Wrong, Percentage correct, Number of questions \n")
+                fd.write("Date, Roundn, Correct, Wrong, Percentage correct, Number of questions, Topics \n")
                 fd.write(results)
 
         
