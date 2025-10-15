@@ -87,6 +87,7 @@ class FlashcardApp:
         self.update_progress()
 
         if self.current_flashcard_index == len(self.flashcard_list):
+            self.percentage_correct = (self.countcorrect / len(self.flashcard_list))*100
             self.write_to_csv()
         if self.current_flashcard_index >= len(self.flashcard_list):
             self.roundn = 2
@@ -107,6 +108,7 @@ class FlashcardApp:
         self.update_progress()
 
         if self.current_wrong_index >= self.final_wrong:
+            self.percentage_correct = (self.countcorrect / len(self.wrong))*100
             self.destroy()
         else:
             self.current_question, self.current_answer = self.wrong[self.current_wrong_index]
@@ -145,16 +147,16 @@ class FlashcardApp:
         self.progressbar["value"] = self.new_value
     
     def write_to_csv(self):
-        """Write results of first round to csv"""
+        """Write results to csv"""
         date = datetime.datetime.now()
-        results = f"{date.strftime("%d/%m/%Y %H:%M")},{self.roundn},{self.countcorrect},{self.countwrong}\n"
+        results = f"{date.strftime("%d/%m/%Y %H:%M")},{self.roundn},{self.countcorrect},{self.countwrong}, {self.percentage_correct}, {len(self.flashcard_list)}\n"
         file = os.path.isfile(outputfile)
         if file:
             with open(outputfile,'a') as fd:
                 fd.write(results)
         else:
             with open(outputfile,'w') as fd:
-                fd.write("Date, Roundn, Correct, Wrong\n")
+                fd.write("Date, Roundn, Correct, Wrong, Percentage correct, Number of questions \n")
                 fd.write(results)
 
         
