@@ -7,23 +7,15 @@ import datetime
 import os.path
 import json
 
-""""
-MOETNOG:
-- topics anders laten wegschrijven naar .csv en die aparte functie waarbij je het apart inlaadt is niet nodig
-
-===== evt ====
-- vervolgens toevoegen aan homescreen dat je ofwel de vragenlijst.json doorneemt ofwel de vorig_keer_fout.json
-=> door dit als eerste vraag toe te voegen als question text 
-bv "wil je je fouten van vorige keer oefenen? correct = ja, wrong = nee, alles opnieuw doen)"
-"""
 # Adapted version from https://medium.com/@arunabh223/how-i-prepare-for-exams-by-creating-flashcards-using-python-6db823b74083 
 
-# Path to your csv file
+# Specify path to csv file
+# Select random and if you want to practice questions wrongly answered in a previous session
 file_path = 'Vragen CSS_fortesting.csv'
 outputfile = "Results_fortesting.csv"
 outputfile_wrong = 'Wrong_last_time_fortesting.json'
 random_option = 'n'
-practice_wrong = 'y'
+practice_wrong = 'n' #y or n
 
 def load_flashcards(file_path):
     """Load flashcards from csv file"""
@@ -43,6 +35,7 @@ try:
     wrong_last_time = load_wrongs(outputfile_wrong)
 except FileNotFoundError:
     pass
+
 
 class FlashcardApp:
     def __init__(self, master):
@@ -92,6 +85,7 @@ class FlashcardApp:
         # Initialize empty lists for keeping correct and wrong items in
         self.correct = []
         self.wrong = []
+        self.topic = []
         self.roundn = 1
         self.final_wrong = 0
 
@@ -111,15 +105,14 @@ class FlashcardApp:
     def next_flashcard(self):
         self.answer_label.config(text="")
         self.current_flashcard_index += 1
-        self.percentage_correct = (self.countcorrect / len(self.flashcards))*100
-
+        
         if self.current_flashcard_index == len(self.flashcards):
             self.destroy()
         else:
             self.dict = self.flashcards[self.current_flashcard_index]
             self.current_question = self.dict['QUESTION']
             self.current_answer = self.dict['ANSWER']
-            self.current_topic = self.dict['TOPIC']
+            self.topic.append(self.dict['TOPIC'])
             self.question_label.config(text=self.current_question)
         self.update_progress()
         
@@ -155,17 +148,24 @@ class FlashcardApp:
         self.progress_var.set(self.new_value)
         self.progressbar["value"] = self.new_value
     
+    def remove_duplicates_topic(self):
+        self.topic_undup = []
+        [self.topic_undup.append(val) for val in self.topic if val not in self.topic_undup]
+        return self.topic_undup
+    
     def write_to_csv(self):
         """Write results to csv"""
+        self.remove_duplicates_topic()
+        self.percentage_correct = (self.countcorrect / self.current_flashcard_index)*100
         date = datetime.datetime.now()
-        results = f"{date.strftime("%d/%m/%Y %H:%M")},practice wrong? {practice_wrong},{self.countcorrect},{self.countwrong}, {int(self.percentage_correct)}, {len(self.flashcards)}\n"
+        results = f"{date.strftime("%d/%m/%Y %H:%M")},{practice_wrong},{self.countcorrect},{self.countwrong}, {int(self.percentage_correct)}, {self.current_flashcard_index}, {self.topic_undup}\n"
         file = os.path.isfile(outputfile)
         if file:
             with open(outputfile,'a') as fd:
                 fd.write(results)
         else:
             with open(outputfile,'w') as fd:
-                fd.write("Date, Roundn, Correct, Wrong, Percentage correct, Number of questions, Topics \n")
+                fd.write("Date, Practice wrong?, Correct, Wrong, Percentage correct, Number of questions, Topics \n")
                 fd.write(results)
         
         # Write wrong to json to enable practice later
