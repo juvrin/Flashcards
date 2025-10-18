@@ -86,7 +86,6 @@ class FlashcardApp:
         self.correct = []
         self.wrong = []
         self.topic = []
-        self.roundn = 1
         self.final_wrong = 0
 
         # Initialize flashcards
@@ -121,19 +120,13 @@ class FlashcardApp:
     
     def correct(self, event=None):
         self.countcorrect += 1
-        if self.roundn == 1:
-            self.correct.append(self.flashcards[self.current_flashcard_index])
-        if self.roundn == 2:
-            self.correct.append(self.wrong[self.current_wrong_index])
+        self.correct.append(self.flashcards[self.current_flashcard_index])
         self.next_flashcard()
 
     def wrong(self, event=None):
         self.countwrong += 1
-        if self.roundn == 1:
-            self.wrong.append(self.flashcards[self.current_flashcard_index])
-            self.final_wrong = len(self.wrong)
-        if self.roundn == 2:
-            self.wrong.append(self.wrong[self.current_wrong_index])
+        self.wrong.append(self.flashcards[self.current_flashcard_index])
+        self.final_wrong = len(self.wrong)
         self.next_flashcard()
      
     def destroy(self, event=None):
