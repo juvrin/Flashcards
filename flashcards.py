@@ -29,13 +29,6 @@ def load_wrongs(outputfile_wrong):
         data = json.load(f)
     return data
 
-# Load flashcards
-flashcards = load_flashcards(file_path)
-try:
-    wrong_last_time = load_wrongs(outputfile_wrong)
-except FileNotFoundError:
-    pass
-
 
 class FlashcardApp:
     def __init__(self, master):
@@ -78,9 +71,13 @@ class FlashcardApp:
 
         # Add keyboard shortcuts
         master.bind('a', self.reveal_answer)
+        master.bind('A', self.reveal_answer)
         master.bind('q', self.destroy)
+        master.bind('Q', self.destroy)
         master.bind('c', self.correct)
+        master.bind('C', self.correct)
         master.bind('w', self.wrong)
+        master.bind('W', self.wrong)
 
         # Initialize empty lists for keeping correct and wrong items in
         self.correct = []
@@ -136,8 +133,6 @@ class FlashcardApp:
     def update_progress(self):
         self.new_value = self.progress_var.get()
         self.new_value += 100 / len(self.flashcards)
-        if self.new_value > 100:
-            self.new_value = 0
         self.progress_var.set(self.new_value)
         self.progressbar["value"] = self.new_value
     
@@ -149,9 +144,14 @@ class FlashcardApp:
     def write_to_csv(self):
         """Write results to csv"""
         self.remove_duplicates_topic()
-        self.percentage_correct = (self.countcorrect / self.current_flashcard_index)*100
         date = datetime.datetime.now()
-        results = f"{date.strftime("%d/%m/%Y %H:%M")},{practice_wrong},{self.countcorrect},{self.countwrong}, {int(self.percentage_correct)}, {self.current_flashcard_index}, {self.topic_undup}\n"
+        try:
+            self.percentage_correct = (self.countcorrect / self.current_flashcard_index)*100
+        except ZeroDivisionError:
+            results = f"{date.strftime("%d/%m/%Y %H:%M")},{practice_wrong},{self.countcorrect},{self.countwrong}, x, {self.current_flashcard_index}, {self.topic_undup}\n"
+            pass
+        else:
+            results = f"{date.strftime("%d/%m/%Y %H:%M")},{practice_wrong},{self.countcorrect},{self.countwrong}, {int(self.percentage_correct)}, {self.current_flashcard_index}, {self.topic_undup}\n"
         file = os.path.isfile(outputfile)
         if file:
             with open(outputfile,'a') as fd:
@@ -166,6 +166,13 @@ class FlashcardApp:
             json.dump(self.wrong, final, indent=2, default=lambda x: list(x) if isinstance(x, tuple) else str(x))    
 
         
+# Load flashcards
+flashcards = load_flashcards(file_path)
+try:
+    wrong_last_time = load_wrongs(outputfile_wrong)
+except FileNotFoundError:
+    pass
+
 root = tk.Tk()
 app = FlashcardApp(root)
 root.mainloop()
