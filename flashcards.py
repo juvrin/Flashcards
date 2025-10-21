@@ -19,38 +19,57 @@ class FlashcardApp:
         self.master = master
         master.title("Flashcard App")
         master.geometry("500x500")  # Set a fixed window size
+        self.intro_screen()
 
+    def intro_screen(self):
         # Initialize intro screen
-        self.input_label = tk.Label(master, text="Inputfile", font=("Helvetica", 16), wraplength=400)
+        self.input_label = tk.Label(self.master, text="Inputfile", font=("Helvetica", 16), wraplength=400)
         self.input_label.pack(pady=5)
-        self.inputfile = tk.Entry(master)
+        self.input2_label = tk.Label(self.master, text="(you can leave this empty if you want to practice wrongs from last time)", font=("Helvetica", 12), wraplength=400)
+        self.input2_label.pack(pady=5)
+        self.inputfile = tk.Entry(self.master)
         self.inputfile.pack(pady=5)
 
-        self.outputfile_label = tk.Label(master, text="Outputfile csv", font=("Helvetica", 16), wraplength=400)
+        self.outputfile_label = tk.Label(self.master, text="Outputfile csv", font=("Helvetica", 16), wraplength=400)
         self.outputfile_label.pack(pady=5)
-        self.outputfile = tk.Entry(master)
+        self.outputfile = tk.Entry(self.master)
         self.outputfile.pack(pady=5)
 
-        self.random_label = tk.Label(master, text="Do you want to shuffle the cards?", font=("Helvetica", 16), wraplength=400)
+        self.random_label = tk.Label(self.master, text="Do you want to shuffle the cards?", font=("Helvetica", 16), wraplength=400)
         self.random_label.pack(pady=5)
         self.random_option = tk.StringVar()
-        self.random_button_yes = tk.Radiobutton(master, text = "Yes", variable = self.random_option, value = "y")
+        self.random_button_yes = tk.Radiobutton(self.master, text = "Yes", variable = self.random_option, value = "y")
         self.random_button_yes.pack(pady = 5) 
-        self.random_button_no = tk.Radiobutton(master, text = "No", variable = self.random_option, value = "n")
+        self.random_button_no = tk.Radiobutton(self.master, text = "No", variable = self.random_option, value = "n")
         self.random_button_no.pack(pady = 5) 
+        self.random_option.set("")
 
-        self.practice_wrong_label = tk.Label(master, text="Do you want to practice wrong questions from last time?", font=("Helvetica", 16), wraplength=400)
+        self.practice_wrong_label = tk.Label(self.master, text="Do you want to practice wrong questions from last time? (required)", font=("Helvetica", 16), wraplength=400)
         self.practice_wrong_label.pack(pady=5)
         self.practice_wrong = tk.StringVar()
-        self.practice_wrong_yes = tk.Radiobutton(master, text = "Yes", variable = self.practice_wrong, value = "y")
+        self.practice_wrong_yes = tk.Radiobutton(self.master, text = "Yes", variable = self.practice_wrong, value = "y")
         self.practice_wrong_yes.pack(pady = 5) 
-        self.practice_wrong_no = tk.Radiobutton(master, text = "No", variable = self.practice_wrong, value = "n")
+        self.practice_wrong_no = tk.Radiobutton(self.master, text = "No", variable = self.practice_wrong, value = "n")
         self.practice_wrong_no.pack(pady = 5) 
 
         # Next button
-        self.next_button = tk.Button(master, text="Next", command=self.startup)
+        self.next_button = tk.Button(self.master, text="Next", command=self.check_entries)
         self.next_button.pack()
-    
+
+        #Error messages
+        self.error1_label = tk.Label(self.master, text="Please either enter a valid outputfile", font=("Helvetica", 16), fg="#f00", wraplength=400)
+        self.error2_label = tk.Label(self.master, text="Please either enter a valid inputfile or choose to practice wrongs from last time", font=("Helvetica", 16), fg="#f00", wraplength=400)
+
+    def check_entries(self):
+        self.error1_label.pack_forget()
+        self.error2_label.pack_forget()
+        if self.outputfile.get() == "":
+            self.error1_label.pack(pady=5)
+        elif (self.practice_wrong.get() == "n" or self.practice_wrong.get() == "") and self.inputfile.get() == "":
+            self.error2_label.pack(pady=5)
+        elif self.practice_wrong.get() == "y" or (self.inputfile.get() != "" and self.practice_wrong.get() == "n"):
+            self.startup()
+
     def load_flashcards(self, file_path):
         """Load flashcards from csv file"""
         df = pd.read_csv(file_path)
@@ -70,6 +89,7 @@ class FlashcardApp:
 
         # Hide all buttons and label from mainscreen
         self.input_label.pack_forget()
+        self.input2_label.pack_forget()
         self.inputfile.pack_forget()
         self.outputfile_label.pack_forget()
         self.outputfile.pack_forget()
