@@ -4,6 +4,8 @@ Flashcards App does what it says on the tin: it's an app that creates flashcards
 There are two versions of this app: one simple terminal version (main.py)
 and one with a graphical user interface (flashcards.py). Both will be described below.
 
+![Flashcards screenshot](/flashcards.png)
+
 ## Getting started - both versions
 
 First create a list of questions and answers in a program like LibreOffice Calc, Excel, Google Sheets, etc. On the top row, put "QUESTION" in the first column
