@@ -4,7 +4,7 @@ Flashcards App does what it says on the tin: it's an app that creates flashcards
 There are two versions of this app: one simple terminal version (main.py)
 and one with a graphical user interface (flashcards.py). Both will be described below.
 
-![Flashcards screenshot](/flashcards.png)
+<img src="/flashcards.png" alt="Screenshot of flashcards app" width="162" height="197">
 
 ## Getting started - both versions
 
